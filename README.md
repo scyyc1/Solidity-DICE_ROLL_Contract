@@ -4,15 +4,15 @@ The general flow process of my implementation is as followed:
 
 ![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.001.jpeg)
 
-1) **The general process of one round of the game** 
-   1. Many users deposit ethers to the contract. The contract records their balance with address.** 
-   1. The player thinks of a number to generate the randomness.** 
-   1. The player calculates the hash value with fix hash function.** 
-   1. **Commit**: the player submits the commitment. The system intake first two players. *(c = hash(<value, nonce>))*** 
-   1. **Reveal**: the player submits the original value. The system verifies the the submitted value with the same hash function. *(v = <value’, nonce’>* 
-      1. *verify c == hash(v))*** 
-   1. Generates the random number with the random seeds provided by both players. Determines who is the winner. 
-   1. Internally allocates the balance according to the outcome. 
+   1) **The general process of one round of the game** 
+      1. Many users deposit ethers to the contract. The contract records their balance with address.** 
+      1. The player thinks of a number to generate the randomness.** 
+      1. The player calculates the hash value with fix hash function.** 
+      1. **Commit**: the player submits the commitment. The system intake first two players. *(c = hash(<value, nonce>))*** 
+      1. **Reveal**: the player submits the original value. The system verifies the the submitted value with the same hash function. *(v = <value’, nonce’>* 
+         1. *verify c == hash(v))*** 
+      1. Generates the random number with the random seeds provided by both players. Determines who is the winner. 
+      1. Internally allocates the balance according to the outcome. 
 
 viii.  Any user is able to withdraw their own balance available in the contract 
 
