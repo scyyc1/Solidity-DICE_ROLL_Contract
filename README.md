@@ -18,7 +18,7 @@ viii.  Any user is able to withdraw their own balance available in the contract
 
 at any time **except the two on-game players**. 
 
-   1.2 **How is it guaranteed that a player cannot cheat?** 
+   2) **How is it guaranteed that a player cannot cheat?** 
 
    Two mechanisms are used to prevent a player from cheating. 
 
