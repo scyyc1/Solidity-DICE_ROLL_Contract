@@ -4,7 +4,7 @@ The general flow process of my implementation is as followed:
 
 ![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.001.jpeg)
 
-   1) **The general process of one round of the game** 
+   1.1 **The general process of one round of the game** 
       1. Many users deposit ethers to the contract. The contract records their balance with address.** 
       1. The player thinks of a number to generate the randomness.** 
       1. The player calculates the hash value with fix hash function.** 
@@ -18,21 +18,21 @@ viii.  Any user is able to withdraw their own balance available in the contract
 
 at any time **except the two on-game players**. 
 
-2) **How is it guaranteed that a player cannot cheat?** 
+   1.2 **How is it guaranteed that a player cannot cheat?** 
 
-Two mechanisms are used to prevent a player from cheating. 
+   Two mechanisms are used to prevent a player from cheating. 
 
-1. **The randomness** 
+   1. **The randomness** 
 
-To stimulate a dice roll, a random number is necessary. Cheating might occur when the generated random number can be predicted by any of player. Suppose both players are competitive, a good implementation should let both sides equally contribute to the randomness. In my implementation, the contract asks players to generate a number. As both sides are unaware of the opponent’s value. The sum of these two numbers could be consider as random.  
+   To stimulate a dice roll, a random number is necessary. Cheating might occur when the generated random number can be predicted by any of player. Suppose both players are competitive, a good implementation should let both sides equally contribute to the randomness. In my implementation, the contract asks players to generate a number. As both sides are unaware of the opponent’s value. The sum of these two numbers could be consider as random.  
 
-**Comparing to using the current block’s information**: the block information can be manipulated by the miner of the block (e.g. *block.timestamp*, *block.number,* etc).  
+   **Comparing to using the current block’s information**: the block information can be manipulated by the miner of the block (e.g. *block.timestamp*, *block.number,* etc).  
 
-**Comparing to using the future block’s information**: the solidity only provides access to the hash of the most recent blocks with ***blockhash()*** function. The average block time is 15 seconds. This means that if we are trying to use the future block (let say *blockhash(block.number + 1)*) the value it return will be 0 as the block is not being mined by any miner. If we are trying to use the previous block (let say *blockhash(block.number - 1)*), as it mentioned above, other players also have access to the same value. The value still risks of being predicted.  
+   **Comparing to using the future block’s information**: the solidity only provides access to the hash of the most recent blocks with ***blockhash()*** function. The average block time is 15 seconds. This means that if we are trying to use the future block (let say *blockhash(block.number + 1)*) the value it return will be 0 as the block is not being mined by any miner. If we are trying to use the previous block (let say *blockhash(block.number - 1)*), as it mentioned above, other players also have access to the same value. The value still risks of being predicted.  
 
-As a result, the formula for calculating randomness is: 
+   As a result, the formula for calculating randomness is: 
 
-![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.002.png)
+   ![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.002.png)
 
 2. **The commitment scheme**:** 
 
