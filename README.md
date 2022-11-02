@@ -143,6 +143,7 @@ The cost needed to proceed each function are roughly as follow:
 |withdraw (1 ETH) |45695 |
 |commit |150719 |
 |**reveal (not fair)** |<p>85905(early reveal)/126438(late </p><p>reveal) </p>|
+
 Generally, the cost of every player is generally fair for the first three action as there is no explicit loop in the contract. This means that every user is expect to execute same amount of code. However, the following situations should be further discussed. 
 
 1. **If one of the players is malicious (fair)** 
