@@ -4,35 +4,36 @@ The general flow process of my implementation is as followed:
 
 ![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.001.jpeg)
 
-   1) **The general process of one round of the game** 
-      1. Many users deposit ethers to the contract. The contract records their balance with address.** 
-      1. The player thinks of a number to generate the randomness.** 
-      1. The player calculates the hash value with fix hash function.** 
-      1. **Commit**: the player submits the commitment. The system intake first two players. *(c = hash(<value, nonce>))*** 
-      1. **Reveal**: the player submits the original value. The system verifies the the submitted value with the same hash function. *(v = <value’, nonce’>* 
-         1. *verify c == hash(v))*** 
-      1. Generates the random number with the random seeds provided by both players. Determines who is the winner. 
-      1. Internally allocates the balance according to the outcome. 
+1) **The general process of one round of the game** 
+    1. Many users deposit ethers to the contract. The contract records their balance with address.
+    1. The player thinks of a number to generate the randomness.** 
+    1. The player calculates the hash value with fix hash function.** 
+    1. **Commit**: the player submits the commitment. The system intake first two players. *(c = hash(<value, nonce>))*** 
+    1. **Reveal**: the player submits the original value. The system verifies the the submitted value with the same hash function. *(v = <value’, nonce’>*  *verify c == hash(v))*
+    1. Generates the random number with the random seeds provided by both players. Determines who is the winner. 
+    1. Internally allocates the balance according to the outcome. 
 
 viii.  Any user is able to withdraw their own balance available in the contract 
 
 at any time **except the two on-game players**. 
 
-   2) **How is it guaranteed that a player cannot cheat?** 
+2) **How is it guaranteed that a player cannot cheat?** 
 
-   Two mechanisms are used to prevent a player from cheating. 
+Two mechanisms are used to prevent a player from cheating. 
 
-   1. **The randomness** 
+1. **The randomness** 
 
-   To stimulate a dice roll, a random number is necessary. Cheating might occur when the generated random number can be predicted by any of player. Suppose both players are competitive, a good implementation should let both sides equally contribute to the randomness. In my implementation, the contract asks players to generate a number. As both sides are unaware of the opponent’s value. The sum of these two numbers could be consider as random.  
+To stimulate a dice roll, a random number is necessary. Cheating might occur when the generated random number can be predicted by any of player. Suppose both players are competitive, a good implementation should let both sides equally contribute to the randomness. In my implementation, the contract asks players to generate a number. As both sides are unaware of the opponent’s value. The sum of these two numbers could be consider as random.  
 
-   **Comparing to using the current block’s information**: the block information can be manipulated by the miner of the block (e.g. *block.timestamp*, *block.number,* etc).  
+**Comparing to using the current block’s information**: the block information can be manipulated by the miner of the block (e.g. *block.timestamp*, *block.number,* etc).  
 
-   **Comparing to using the future block’s information**: the solidity only provides access to the hash of the most recent blocks with ***blockhash()*** function. The average block time is 15 seconds. This means that if we are trying to use the future block (let say *blockhash(block.number + 1)*) the value it return will be 0 as the block is not being mined by any miner. If we are trying to use the previous block (let say *blockhash(block.number - 1)*), as it mentioned above, other players also have access to the same value. The value still risks of being predicted.  
+**Comparing to using the future block’s information**: the solidity only provides access to the hash of the most recent blocks with ***blockhash()*** function. The average block time is 15 seconds. This means that if we are trying to use the future block (let say *blockhash(block.number + 1)*) the value it return will be 0 as the block is not being mined by any miner. If we are trying to use the previous block (let say *blockhash(block.number - 1)*), as it mentioned above, other players also have access to the same value. The value still risks of being predicted.  
 
-   As a result, the formula for calculating randomness is: 
+As a result, the formula for calculating randomness is: 
 
-   ![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.002.png)
+    function pseudorandomDice(uint num1, uint num2) public pure returns (uint) {
+        return (num1 + num2) % 6 + 1;
+    }
 
 2. **The commitment scheme**:** 
 
@@ -88,11 +89,43 @@ The solutions are:
 
 ![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.004.jpeg)
 
-![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.005.jpeg)
+    function PayEntranceFee(address player) private returns(bool)  {
+        if(balance[player] < ENTRANCE_FEE)
+            return false;
+        balance[player] -= ENTRANCE_FEE;
+        balance[ContractOwner] += ENTRANCE_FEE;
+        return true;
+    }
+
+    function refundEntranceFee(address player) private returns(bool) {
+        if(balance[ContractOwner] < ENTRANCE_FEE)
+            return false;
+        balance[ContractOwner] -= ENTRANCE_FEE;
+        balance[player] += ENTRANCE_FEE;
+        return true;
+    }
 
 3. **Time out penalization**: The contract also tracks the time of the on- seat player (**Suppose that the miner is honest**). The time limit is set to be 30 second. If the on-seat player does not reveal the value, other players are able to process commitment in the place. Since reveal function is not executed, the former player is not able to get the refund. The *isTimeOut()* function keeps track of timing issues. When a timeout situation is detected, the following rules are applied to determine the outcome: 
 
-![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.006.jpeg)
+     ```
+     // Hendling situations that if either side of player refuse to reveal its number
+    function isTimeOut() public returns(bool) {
+        if(isTiming) {
+            if(block.timestamp - BothCommitTime < TIME_LIMIT)
+                return false;
+            else{
+                if(players[0].isRevealed == true && players[1].isRevealed == false)
+                    settle(players[0].addr, players[1].addr, MIN_STAKE);
+                else if(players[1].isRevealed == true && players[0].isRevealed == false)
+                    settle(players[1].addr, players[0].addr, MIN_STAKE);
+                
+                isTiming = false;
+                return true;
+            }
+        }
+        return true;
+    }
+     ```
 
 ||Player 1 |Player 2 |
 | :- | - | - |
@@ -125,7 +158,10 @@ If both players are trying to cheat in a game, which means they don’t reveal t
 
 This  means  that  both  players  commit  a  value  and  reveal  it honestly. In such situation, the player who reveal his number late will pay more gas than the previous one. This is because **the calculation of the  gaming  result  will  be  triggered  once  the  later  player  have revealed his/her value**. This means that the later player will execute slightly more code than the previous one (**Funding paid by last  contributor**). 
 
-![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.007.jpeg)
+        // If both player have revealed, evaluate the game
+        if (players[0].isRevealed == true && players[1].isRevealed == true){
+            outcome();
+        }
 
 Since the Ethereum does not internally support the waiting action, which is contrary to the decentralization idea of blockchain technique, it is quite unrealistic to expect every player to pay exactly the same gas price. 
 
@@ -139,7 +175,14 @@ Since  the  system  keep  tracks  of  the  balance  of  each  user independently
 
 In the contract, the direct balance manipulation is further taken apart from the gaming process (**pull over push design**). This means that the balance status can only be affected by the gaming result (The outcome function, which is set to private). The result is only visible to both players but they have no access to it. Instead of transferring balance directly to the winner, let the player withdraw it when they want to. 
 
-![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.008.jpeg)
+    function withdraw(uint amount) public {
+        // Restrict the withdraw event when conducting a game
+        require(msg.sender != players[0].addr && msg.sender != players[1].addr, "Sorry, you are in a game!");        
+        require(amount <= balance[msg.sender], "Sorry, your balance is not enough!");
+        balance[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+        emit Withdrawal(msg.sender);
+    }
 
 As a result, the only scenario that the reentrancy attack might occur is the 
 
