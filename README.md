@@ -4,7 +4,7 @@ The general flow process of my implementation is as followed:
 
 ![](./pic/Aspose.Words.0a166ca0-f820-4b06-a034-e7126550a720.001.jpeg)
 
-   1.1 **The general process of one round of the game** 
+   1) **The general process of one round of the game** 
       1. Many users deposit ethers to the contract. The contract records their balance with address.** 
       1. The player thinks of a number to generate the randomness.** 
       1. The player calculates the hash value with fix hash function.** 
