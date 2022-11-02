@@ -12,8 +12,7 @@ The general flow process of my implementation is as followed:
     1. **Reveal**: the player submits the original value. The system verifies the the submitted value with the same hash function. *(v = <value’, nonce’>*  *verify c == hash(v))*
     1. Generates the random number with the random seeds provided by both players. Determines who is the winner. 
     1. Internally allocates the balance according to the outcome. 
-
-viii.  Any user is able to withdraw their own balance available in the contract 
+    1.  Any user is able to withdraw their own balance available in the contract 
 
 at any time **except the two on-game players**. 
 
